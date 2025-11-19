@@ -26,22 +26,31 @@ public String profileView(
 
     QRCodeEntity q = null;
     
-    // Buscar por ID primero (más eficiente en producción)
+    // En producción, priorizar ID sobre encryptedText
     if (id != null && !id.trim().isEmpty()) {
         q = qrCodeService.findById(id).orElse(null);
     }
     
-    // Si no se encuentra por ID, buscar por encryptedText (para compatibilidad)
+    // Si no se encuentra por ID, intentar con encryptedText
     if (q == null && encryptedText != null && !encryptedText.trim().isEmpty()) {
         q = qrCodeService.getQRCodeWithPersonalData(encryptedText);
     }
 
-    // El resto del código se mantiene igual...
     if (q == null) {
         model.addAttribute("found", false);
         model.addAttribute("message", "QR no válido o no registrado en la base de datos.");
     } else {
-        // ... código existente
+        model.addAttribute("found", true);
+        model.addAttribute("nombre", safe(q.getNombre()));
+        model.addAttribute("apellidos", safe(q.getApellidos()));
+        model.addAttribute("ci", safe(q.getCi()));
+        model.addAttribute("fechaNacimiento", q.getFechaNacimiento() != null ? 
+            q.getFechaNacimiento().toString() : "");
+        model.addAttribute("fotoUrl", q.getFotoUrl());
+        model.addAttribute("cargo", safe(q.getCargo()));
+        model.addAttribute("departamento", safe(q.getDepartamento()));
+        model.addAttribute("areaVoluntariado", safe(q.getAreaVoluntariado()));
+        model.addAttribute("message", "✅ QR VÁLIDO - Datos verificados en la base de datos");
     }
 
     model.addAttribute("encryptedText", encryptedText);
