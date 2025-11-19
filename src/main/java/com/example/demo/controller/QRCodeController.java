@@ -55,10 +55,16 @@ public class QRCodeController {
      *  SIEMPRE usa el TEXTO CIFRADO (encrypted), NO el IV.
      *  Ej.: http://192.168.0.11:8080/qr/profile?encryptedText=BASE64...
      */
-    private String buildQrUrl(String encryptedText) {
-        return publicBaseUrl + "/qr/profile?encryptedText=" +
-                URLEncoder.encode(encryptedText, StandardCharsets.UTF_8);
+    private String buildQrUrl(String encryptedText, String id) {
+    // En producción, usar solo ID para evitar QR overflow
+    if (publicBaseUrl.contains("railway") || publicBaseUrl.contains("production")) {
+        return publicBaseUrl + "/qr/profile?id=" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+    } else {
+        // En local, mantener comportamiento original
+        return publicBaseUrl + "/qr/profile?encryptedText=" + 
+               URLEncoder.encode(encryptedText, StandardCharsets.UTF_8);
     }
+}
 
     // =========================
     // 1) GENERAR QR SIN DATOS
@@ -82,7 +88,7 @@ public class QRCodeController {
             qrCodeService.saveQRCode(id, hash, encryptedText, keyString, iv, LocalDateTime.now());
 
             // URL pública a codificar en el QR
-            String qrUrl = buildQrUrl(encryptedText);
+            String qrUrl = buildQrUrl(encryptedText, id);
 
             // Generar PNG del QR con la URL (por si luego quieres usarlo)
             String pngName = "qr_" + id + ".png";
@@ -156,7 +162,7 @@ public class QRCodeController {
             );
 
             // 5) URL dentro del QR y PNG del QR
-            String qrUrl = buildQrUrl(encryptedText);
+            String qrUrl = buildQrUrl(encryptedText, id);
             String pngName = "qr_" + id + ".png";
             fileStorageService.generateQRCodeImage(qrUrl, pngName);
 

@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.Optional;
 
 @Service
 public class QRCodeService {
@@ -74,4 +75,7 @@ public class QRCodeService {
     public Long getTotalGeneratedCount() {
         return qrCodeRepository.countActiveQRCodes();
     }
+    public Optional<QRCodeEntity> findById(String id) {
+    return qrCodeRepository.findById(id);
+}
 }
